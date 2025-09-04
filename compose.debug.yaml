@@ -1,0 +1,59 @@
+name: "aegis-debug"
+
+services:
+  aegis-api-debug:
+    container_name: aegis-api-debug
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    env_file:
+      - .env
+    ports:
+      - "${APP_API_PORT:-8080}:${APP_API_PORT:-8080}"
+      - "2345:2345"
+    depends_on:
+      aegis-db:
+        condition: service_healthy
+    networks:
+      - aegis-network
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+    security_opt:
+      - "seccomp:unconfined"
+    command:
+      - "dlv"
+      - "exec"
+      - "/bin/main"
+      - "--headless"
+      - "--listen=:2345"
+      - "--api-version=2"
+      - "--accept-multiclient"
+
+  aegis-db:
+    container_name: aegis-db
+    restart: always
+    image: "postgres:17-alpine"
+    ports:
+      - "5454:${APP_DB_PORT:-5432}"
+    environment:
+      POSTGRES_USER: ${APP_DB_USER:-username}
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-password}
+      POSTGRES_DB: ${APP_DB_NAME:-aegis-db}
+    volumes:
+      - aegis-data:/var/lib/postgresql/data:rw
+    networks:
+      - aegis-network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  aegis-data:
+    driver: local
+
+networks:
+  aegis-network:
+    driver: bridge
