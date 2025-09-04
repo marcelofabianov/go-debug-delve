@@ -23,7 +23,6 @@
 *.swop
 *.tmp
 *.cfg
-/tmp/
 __debug*
 
 # Database files
