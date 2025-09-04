@@ -41,7 +41,7 @@ __debug*
 # Environment variables file
 .env*
 *.env*
-!/_env/dev/dev.env
+!.env.example
 
 # Test binary, built with `go test -c`
 /bin/
