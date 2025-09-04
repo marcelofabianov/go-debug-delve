@@ -24,6 +24,7 @@
 *.tmp
 *.cfg
 __debug*
+/debug*
 
 # Database files
 *.db
